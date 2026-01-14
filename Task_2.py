@@ -1,36 +1,45 @@
-import pprint
+import pprint  # Для красивого вывода
 
-# Загрузка данных из файла и создание cook_book
-with open('recipes.txt', 'r', encoding='utf-8') as f:
-    lines = f.read().splitlines()
 
-cook_book = {}
-i = 0
-while i < len(lines):
-    if not lines[i]:
-        i += 1
-        continue
+def parse_recipes(file_path):
+    cook_book = {}
+    with open(file_path, 'r', encoding='utf-8') as f:
+        for line in f:
+            stripped_line = line.strip()
 
-    dish_name = lines[i]
-    num_ingredients = int(lines[i + 1])
+            if not stripped_line:
+                continue
 
-    ingredients = []
-    for j in range(i + 2, i + 2 + num_ingredients):
-        parts = lines[j].split(' | ')
-        ingredient = {
-            'ingredient_name': parts[0],
-            'quantity': int(parts[1]),
-            'measure': parts[2]
-        }
-        ingredients.append(ingredient)
+            dish_name = stripped_line
+            num_ingredients = int(f.readline().strip())
+            ingredients = []
+            '''
+            Я узнала, что В Python символ _ часто используется
+            как соглашение о наименовании переменных-пустышек (dummy variables),
+            которые нужны лишь для синтаксической структуры цикла или конструкции,
+            но сами по себе значения не имеют. 
+            Надеюсь ничего страшного, что я это использовала здесь.
+            '''
+            for _ in range(num_ingredients):
+                ingr_line = f.readline().strip()
+                parts = ingr_line.split('|')
 
-    cook_book[dish_name] = ingredients
-    i += 2 + num_ingredients
+                ingredient = {
+                    'ingredient_name': parts[0].strip(),
+                    'quantity': int(parts[1].strip()),
+                    'measure': parts[2].strip()
+                }
+                ingredients.append(ingredient)
 
-def shop_list_by_dishes(dishes, person_count):
+            cook_book[dish_name] = ingredients
+
+    return cook_book
+
+def shop_list_by_dishes(cook_book, dishes, person_count):
     shop_list = {}
     for dish in dishes:
         ingredients = cook_book.get(dish, None)
+
         if ingredients is None:
             print(f"Блюдо '{dish}' нет в кулинарной книге.")
             continue
@@ -48,7 +57,11 @@ def shop_list_by_dishes(dishes, person_count):
     return shop_list
 
 
-selected_dishes = ['Омлет', 'Запеченный картофель']
-person_count = 2
-final_shop_list = shop_list_by_dishes(selected_dishes, person_count)
-pprint.pprint(final_shop_list)
+
+if __name__ == "__main__":
+    cook_book = parse_recipes('recipes.txt')
+    selected_dishes = ['Омлет', 'Запеченный картофель']
+    person_count = 2
+    final_shop_list = shop_list_by_dishes(cook_book, selected_dishes, person_count)
+
+    pprint.pprint(final_shop_list)
